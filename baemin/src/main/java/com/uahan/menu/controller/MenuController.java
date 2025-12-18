@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @WebServlet("/menu/*")
@@ -40,19 +41,10 @@ public class MenuController extends HttpServlet {
             } else {
                 req.getRequestDispatcher("/WEB-INF/views/menu/list.jsp").forward(req, resp);
             }
-        } else if ("/detail".equals(pathInfo)) {
+        } else {
+            // All other get requests (regist, update, detail) redirect to list as we use
+            // modals now
             resp.sendRedirect(req.getContextPath() + "/menu/list");
-        } else if ("/regist".equals(pathInfo)) {
-            List<CategoryDTO> categoryList = menuService.selectAllCategories();
-            req.setAttribute("categoryList", categoryList);
-            req.getRequestDispatcher("/WEB-INF/views/menu/regist.jsp").forward(req, resp);
-        } else if ("/update".equals(pathInfo)) {
-            int menuCode = Integer.parseInt(req.getParameter("menuCode"));
-            MenuDTO menu = menuService.selectMenuById(menuCode);
-            List<CategoryDTO> categoryList = menuService.selectAllCategories();
-            req.setAttribute("menu", menu);
-            req.setAttribute("categoryList", categoryList);
-            req.getRequestDispatcher("/WEB-INF/views/menu/regist.jsp").forward(req, resp);
         }
     }
 
@@ -60,55 +52,53 @@ public class MenuController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
         req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/plain;charset=UTF-8"); // Response for AJAX
 
-        if ("/regist".equals(pathInfo)) {
-            String name = req.getParameter("menuName");
-            int price = Integer.parseInt(req.getParameter("menuPrice"));
-            int categoryCode = Integer.parseInt(req.getParameter("categoryCode"));
-            String status = req.getParameter("orderableStatus");
+        PrintWriter out = resp.getWriter();
+        int result = 0;
 
-            MenuDTO menu = new MenuDTO();
-            menu.setMenuName(name);
-            menu.setMenuPrice(price);
-            menu.setCategoryCode(categoryCode);
-            menu.setOrderableStatus(status);
+        try {
+            if ("/regist".equals(pathInfo)) {
+                String name = req.getParameter("menuName");
+                int price = Integer.parseInt(req.getParameter("menuPrice"));
+                int categoryCode = Integer.parseInt(req.getParameter("categoryCode"));
+                String status = req.getParameter("orderableStatus");
 
-            int result = menuService.registMenu(menu);
+                MenuDTO menu = new MenuDTO();
+                menu.setMenuName(name);
+                menu.setMenuPrice(price);
+                menu.setCategoryCode(categoryCode);
+                menu.setOrderableStatus(status);
 
-            if (result > 0) {
-                resp.sendRedirect(req.getContextPath() + "/menu/list");
-            } else {
-                req.setAttribute("message", "메뉴 등록 실패");
-                req.getRequestDispatcher("/WEB-INF/views/common/error.jsp").forward(req, resp);
+                result = menuService.registMenu(menu);
+
+            } else if ("/update".equals(pathInfo)) {
+                int code = Integer.parseInt(req.getParameter("menuCode"));
+                String name = req.getParameter("menuName");
+                int price = Integer.parseInt(req.getParameter("menuPrice"));
+                int categoryCode = Integer.parseInt(req.getParameter("categoryCode"));
+                String status = req.getParameter("orderableStatus");
+
+                MenuDTO menu = new MenuDTO(code, name, price, categoryCode, status);
+
+                result = menuService.modifyMenu(menu);
+
+            } else if ("/delete".equals(pathInfo)) {
+                int code = Integer.parseInt(req.getParameter("menuCode"));
+                result = menuService.deleteMenu(code);
             }
 
-        } else if ("/update".equals(pathInfo)) {
-            int code = Integer.parseInt(req.getParameter("menuCode"));
-            String name = req.getParameter("menuName");
-            int price = Integer.parseInt(req.getParameter("menuPrice"));
-            int categoryCode = Integer.parseInt(req.getParameter("categoryCode"));
-            String status = req.getParameter("orderableStatus");
-
-            MenuDTO menu = new MenuDTO(code, name, price, categoryCode, status);
-
-            int result = menuService.modifyMenu(menu);
-
             if (result > 0) {
-                resp.sendRedirect(req.getContextPath() + "/menu/list");
+                out.print("success");
             } else {
-                req.setAttribute("message", "메뉴 수정 실패");
-                req.getRequestDispatcher("/WEB-INF/views/common/error.jsp").forward(req, resp);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("fail");
             }
-        } else if ("/delete".equals(pathInfo)) {
-            int code = Integer.parseInt(req.getParameter("menuCode"));
-            int result = menuService.deleteMenu(code);
 
-            if (result > 0) {
-                resp.sendRedirect(req.getContextPath() + "/menu/list");
-            } else {
-                req.setAttribute("message", "메뉴 삭제 실패");
-                req.getRequestDispatcher("/WEB-INF/views/common/error.jsp").forward(req, resp);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("error");
         }
     }
 }

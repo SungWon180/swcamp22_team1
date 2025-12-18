@@ -26,33 +26,44 @@
 
 ---
 
-## 1. 💡 시작하기 전에: 필수 개념 (이건 알고 가자!)
+## 1. 💡 시작하기 전에: 필수 개념 (기술 용어 정리)
 
-코드를 보기 전에, **"이게 왜 필요한지"** 모르면 외계어처럼 보입니다. 딱 5가지만 짚고 넘어갑시다.
+코드 흐름을 이해하기 위해 꼭 알아야 할 핵심 기술 용어들입니다.
 
-### ① JDBC (자바와 DB의 연결고리)
-*   자바는 영어를 쓰고, DB는 스페인어(SQL)를 씁니다. 말이 안 통하죠?
-*   이 둘 사이를 연결해서 통역해주는 기술이 **JDBC**입니다.
-*   "전화 걸기(Connection)", "말하기(Statement)", "듣기(ResultSet)" 기능을 합니다.
+### ① JSP (Java Server Pages) vs 서블릿 (Servlet)
+*   **서블릿 (Servlet)**: 자바 언어로 웹 요청을 처리하는 **클래스(.java)**입니다. HTML을 만들기 불편해서 주로 **로직 처리**를 담당합니다.
+*   **JSP**: HTML 안에 자바 코드를 섞어 쓸 수 있는 **파일(.jsp)**입니다. HTML 작성이 편해서 주로 **화면 출력**을 담당합니다.
+*   *작동 원리*: 사용자가 페이지를 요청하면, 서버(Tomcat)가 JSP를 서블릿 코드로 변환해서 실행합니다.
 
-### ② 서블릿 (Servlet) & 톰캣 (Tomcat)
-*   **톰캣**: 우리가 만든 웹 사이트를 24시간 띄워주는 **가게 건물(서버)**입니다.
-*   **서블릿**: 가게에서 일하는 **점원(자바 파일)**입니다. 손님이 오면 주문을 받고, 주방에 오더를 넣습니다.
+### ② 동기(Sync) vs 비동기(Async) 처리
+*   **동기 처리 (Synchronous)**: 요청을 보내면 응답이 올 때까지 하던 일을 멈추고 기다립니다. (예: 링크 클릭 시 화면이 하얘지며 새 페이지가 뜰 때까지 대기)
+*   **비동기 처리 (Asynchronous)**: 요청을 보내놓고, 응답을 기다리지 않고 다른 일을 계속 합니다. (예: 유튜브 보면서 댓글 로딩)
 
-### ③ 트랜잭션 (Transaction - "한 큐에 끝내기")
-*   은행 이체를 생각해보세요. 내 통장에서 돈은 나갔는데, 상대방 통장에 안 들어갔다면? 큰일나죠.
-*   **"모든 과정이 성공해야 저장(Commit), 하나라도 실패하면 전체 취소(Rollback)"**
-*   이걸 관리하는 게 이 프로젝트의 핵심입니다. (`Service`가 담당)
+### ③ AJAX (Asynchronous JavaScript and XML)
+*   **개념**: 웹 페이지 전체를 새로고침하지 않고, **필요한 데이터만** 서버와 비동기로 교환하는 기술입니다.
+*   **장점**: 화면 깜빡임이 없고 속도가 빠릅니다. 우리 프로젝트의 **등록/수정/삭제** 기능에 적용되었습니다.
 
-### ④ DTO, DAO, Service, Controller (역할 놀이)
-*   **DTO (가방)**: 그냥 데이터 담는 그릇. 로직 없음.
-*   **DAO (창고지기)**: DB에서 데이터 꺼내고 넣는 일만 함.
-*   **Service (지배인)**: 전체적인 일 처리를 지시함. (주문 받고 -> 재고 확인 -> 결제 지시)
-*   **Controller (카운터)**: 손님(화면)과 처음 만나는 곳.
+### ④ Modal (모달)
+*   **개념**: 기존 브라우저 창 위에 띄우는 **레이어 팝업**입니다.
+*   **특징**: 일반 팝업창(window.open)과 달리 브라우저에 종속적이며, 배경을 어둡게 처리(Backdrop)하여 사용자의 조작을 제어할 수 있습니다.
 
-### ⑤ static (공유재)
-*   `static`이 붙은 메서드나 변수는 **"객체를 생성(new)하지 않아도 쓸 수 있다"**는 뜻입니다.
-*   `JDBCTemplate.getConnection()` 처럼 씁니다. (편리함!)
+### ⑤ JDBC & 트랜잭션 (Datebase 통신)
+*   **JDBC**: 자바 프로그램이 데이터베이스(DB)와 통신하기 위한 표준 API입니다. (연결, 쿼리 전송, 결과 수신)
+*   **트랜잭션 (Transaction)**: 여러 개의 DB 작업을 **하나의 단위**로 묶은 것입니다. "모두 성공(Commit) 아니면 모두 취소(Rollback)"를 보장하여 데이터 무결성을 지킵니다. (예: 메뉴 등록 시 테이블에 데이터가 들어갔어도 커밋하지 않으면 실제 저장되지 않음)
+
+### ⑥ MVC 패턴 (Model - View - Controller)
+우리가 코드를 나누는 기준입니다.
+*   **Model (데이터 & 로직)**
+    *   **DTO (Data Transfer Object)**: 데이터를 담아 나르는 객체 (Getter/Setter만 존재)
+    *   **DAO (Data Access Object)**: DB에 실제로 접근하여 SQL을 실행하는 객체
+    *   **Service**: 트랜잭션을 관리하고 비즈니스 로직(규칙)을 수행하는 객체
+*   **View (화면)**
+    *   **JSP**: 사용자에게 보여질 화면(HTML)을 생성
+*   **Controller (조정자)**
+    *   **Servlet**: 클라이언트의 요청(Request)을 받아 Service에 일을 시키고, 결과에 따라 적절한 View로 보냄
+
+### ⑦ static (정적 요소를 위한 키워드)
+*   `static` 멤버는 프로그램 시작 시 메모리에 한 번만 할당되어, 객체 생성(`new`) 없이 클래스 이름으로 바로 접근 가능합니다. 공용 도구(`JDBCTemplate`) 등에 사용됩니다.
 
 ---
 
@@ -81,25 +92,27 @@ src/main
     ├── index.jsp                  (🏠 메인 대문)
     └── WEB-INF/views/             (🖼️ 보안 화면 파일들)
         ├── menu/
-        │   ├── list.jsp
-        │   └── regist.jsp
+        │   └── list.jsp           (📋 메뉴 목록 + 등록/수정 모달)
         └── common/
             └── error.jsp
 ```
+
+> **달라진 점!**  
+> 예전에는 `regist.jsp` 페이지가 따로 있었는데, 지금은 `list.jsp` 안의 **모달(팝업창)**로 들어갔습니다.  
+> 화면 이동 없이 훨씬 빠르고 세련되게 동작합니다! 😎
 
 ---
 
 ## 3. 🚀 데이터 흐름 (주문에서 배달까지)
 
-**"메뉴 저장 버튼을 눌렀을 때 무슨 일이 일어나나요?"**
+**"메뉴 저장 버튼을 눌렀을 때 무슨 일이 일어나나요?" (AJAX 버전)**
 
-1.  **[화면]**: 사용자가 입력한 데이터(치킨, 2만원)가 `MenuController`로 날아갑니다.
-2.  **[Controller]**: 데이터를 `MenuDTO`(가방)에 담아서 `Service`를 부릅니다.
-3.  **[Service]**: `Connection`(전화)을 연결합니다. `DAO`에게 "저장해줘" 시킵니다.
-    *   *왜 여기서 연결하나요?*: 트랜잭션 관리(취소/확정)를 여기서 해야 하니까요!
-4.  **[DAO]**: `Connection`을 받아서 진짜 쿼리(`INSERT`)를 DB에 날립니다.
-5.  **[Service]**: 성공하면 `commit`, 실패하면 `rollback`하고 전화를 끊습니다.
-6.  **[Controller]**: "성공했습니다!" 하고 목록 페이지로 보냅니다.
+1.  **[화면 (JSP)]**: 사용자가 모달 창에서 데이터를 입력하고 "등록"을 누릅니다.
+2.  **[JavaScript]**: 화면이 깜빡이지 않게(AJAX) 몰래 `MenuController`로 데이터를 보냅니다.
+3.  **[Controller]**: 데이터를 받아서 `Service`에게 "저장해줘" 시킵니다.
+4.  **[Service & DAO]**: DB에 데이터를 저장하고, 성공하면 도장(Commit)을 찍습니다.
+5.  **[Controller]**: 성공했다는 신호("success")를 JavaScript에게 보냅니다.
+6.  **[JavaScript]**: 신호를 받으면 초록색 알림창("성공!")을 띄우고 목록을 새로고침 합니다.
 
 ---
 
@@ -402,7 +415,7 @@ public class MenuDTO {
          WHERE menu_code = ?
     </entry>
 
-    <!-- 카테고리 목록 조회 SQL (셀렉트 박스 만들 때 필요) -->
+    <!-- 카테고리 목록 조회 SQL (코드 1은 한식, 2는 중식... 보여줄 때 필요) -->
     <entry key="selectAllCategories">
         SELECT
                category_code
@@ -520,8 +533,7 @@ public class MenuDAO {
         return result; // "1개 등록됨" 반환
     }
 
-    /* selectMenuById, updateMenu, deleteMenu 등도 위와 똑같은 구조라서 생략 없이 넣어야 하지만
-       너무 길어지므로 패턴은 위와 동일하다는 점만 알면 됩니다. (실제 프로젝트엔 다 있습니다) */
+    /* selectMenuById, updateMenu, deleteMenu 등도 위와 똑같이 생겼습니다 */
 }
 ```
 
@@ -593,7 +605,8 @@ public class MenuService {
 ### 6. 컨트롤러 (Controller - 카운터)
 ![Java](https://img.shields.io/badge/Java-MenuController.java-000000?style=flat&logo=java&logoColor=white)
 
-손님의 요청을 가장 먼저 받는 곳입니다. `doGet`(조회)과 `doPost`(제출)로 나뉩니다.
+사용자의 요청을 받아서 교통정리를 합니다.
+이번 업데이트로 **AJAX(비동기 통신)**을 지원하도록 업그레이드 되었습니다!
 
 ```java
 package com.uahan.menu.controller;
@@ -604,9 +617,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
-// localhost:8080/menu/* 여기로 들어오는 모든 요청은 내가 받는다!
 @WebServlet("/menu/*")
 public class MenuController extends HttpServlet {
 
@@ -614,66 +627,74 @@ public class MenuController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        menuService = new MenuService(); // 가게 문 열 때 지배인 출근시킴
+        menuService = new MenuService();
     }
 
-    // GET 방식: 주로 "화면 보여줘" 할 때 씁니다.
+    // GET 요청: 주로 화면을 보여줄 때
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getPathInfo(); // 사용자가 요청한 세부 주소 (예: /list)
+        String pathInfo = req.getPathInfo();
 
-        // 1. 목록 보여줘 (/list)
         if (pathInfo == null || "/list".equals(pathInfo)) {
-            // 지배인(Service) 부름
+            // 메뉴 목록 데이터 준비
             List<MenuDTO> menuList = menuService.selectAllMenus();
             
-            // 받아온 메뉴판(데이터)을 'menuList'라는 이름표 붙여서 포장
+            // 모달 창에 카테고리(한식, 중식...) 보여주려면 이것도 필요함
+            List<CategoryDTO> categoryList = menuService.selectAllCategories();
+
             req.setAttribute("menuList", menuList);
-            
-            // "저기 list.jsp 테이블로 가서 보여드리세요" (화면 이동)
-            req.getRequestDispatcher("/WEB-INF/views/menu/list.jsp").forward(req, resp);
-        } 
-        // 2. 등록 폼 보여줘 (/regist)
-        else if ("/regist".equals(pathInfo)) {
-            // 그냥 가면 안되고 카테고리 목록을 가져가야 함 (치킨, 한식 고를 수 있게)
-            req.setAttribute("categoryList", menuService.selectAllCategories());
-            req.getRequestDispatcher("/WEB-INF/views/menu/regist.jsp").forward(req, resp);
+            req.setAttribute("categoryList", categoryList);
+
+            // AJAX 요청이면 내용물만 주고, 아니면 전체 페이지(list.jsp)를 줌
+            String ajaxHeader = req.getHeader("X-Requested-With");
+            if ("XMLHttpRequest".equals(ajaxHeader)) {
+                req.getRequestDispatcher("/WEB-INF/views/menu/list_content.jsp").forward(req, resp);
+            } else {
+                req.getRequestDispatcher("/WEB-INF/views/menu/list.jsp").forward(req, resp);
+            }
+        } else {
+            // 딴 데로 들어오면 다 목록으로 보내버림
+            resp.sendRedirect(req.getContextPath() + "/menu/list");
         }
     }
 
-    // POST 방식: 폼 작성해서 "제출" 버튼 눌렀을 때 씁니다. (DB가 바뀔 때)
+    // POST 요청: 등록, 수정, 삭제할 때 (AJAX 전용!)
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
-        req.setCharacterEncoding("UTF-8"); // 한국말 깨짐 방지
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/plain;charset=UTF-8"); // "나 그냥 글자만 보낸다"
 
-        // 1. 등록 제출 (/regist)
-        if ("/regist".equals(pathInfo)) {
-            // HTML 폼에서 입력한 값(name="...")들 꺼내기
-            String name = req.getParameter("menuName");
-            int price = Integer.parseInt(req.getParameter("menuPrice"));
-            int categoryCode = Integer.parseInt(req.getParameter("categoryCode"));
-            String status = req.getParameter("orderableStatus");
+        PrintWriter out = resp.getWriter();
+        int result = 0;
 
-            // 가방(DTO)에 짐 싸기
-            MenuDTO menu = new MenuDTO();
-            menu.setMenuName(name);
-            menu.setMenuPrice(price);
-            menu.setCategoryCode(categoryCode);
-            menu.setOrderableStatus(status);
+        try {
+            if ("/regist".equals(pathInfo)) {
+                // 메뉴 등록 로직...
+                result = menuService.registMenu(menu);
 
-            // 지배인 호출!
-            int result = menuService.registMenu(menu);
+            } else if ("/update".equals(pathInfo)) {
+                // 메뉴 수정 로직...
+                result = menuService.modifyMenu(menu);
 
-            // 결과 안내
-            if (result > 0) {
-                // 성공! 목록 페이지로 새로고침(이사) 가세요
-                resp.sendRedirect(req.getContextPath() + "/menu/list");
-            } else {
-                // 실패! 에러 페이지 보여줘
-                req.setAttribute("message", "메뉴 등록 실패");
-                req.getRequestDispatcher("/WEB-INF/views/common/error.jsp").forward(req, resp);
+            } else if ("/delete".equals(pathInfo)) {
+                // 메뉴 삭제 로직...
+                result = menuService.deleteMenu(code);
             }
+
+            // ★ 결과 보내기 ★
+            // 성공하면 "success", 실패하면 "fail"이라는 글자만 띡 보냄.
+            // 그러면 자바스크립트가 알아서 처리함.
+            if (result > 0) {
+                out.print("success");
+            } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("fail");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.print("error"); // 에러 났을 때
         }
     }
 }
@@ -684,11 +705,11 @@ public class MenuController extends HttpServlet {
 ### 7. 화면 (View - JSP)
 ![JSP](https://img.shields.io/badge/JSP-list.jsp-007396?style=flat&logo=java&logoColor=white)
 
-HTML과 비슷하지만 `<% %>`나 `${ }` 같은 자바 코드를 쓸 수 있는 파일입니다.
+화면에 **모달(Modal)**들이 숨어있다가 버튼을 누르면 나타납니다.
 
 ```jsp
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %> <%-- JSTL 라이브러리 (반복문 쓰려고) --%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <html>
 <head>
@@ -697,23 +718,57 @@ HTML과 비슷하지만 `<% %>`나 `${ }` 같은 자바 코드를 쓸 수 있는
 <body>
 
     <div class="container">
-        <h1>메뉴 관리</h1>
-
-        <div class="menu-list">
-            <%-- forEach: 메뉴 리스트만큼 반복해서 카드를 찍어냄 --%>
-            <%-- items="${menuList}"가 Controller에서 보낸 그 데이터입니다! --%>
-            <c:forEach var="menu" items="${menuList}">
-                <div class="menu-card">
-                    <%-- ${menu.menuName}: DTO의 getMenuName()을 호출해서 출력함 --%>
-                    <div class="menu-name">${menu.menuName}</div>
-                    <div class="menu-price">${menu.menuPrice}원</div>
-                    <!-- 클릭하면 상세 수정 팝업 띄우는 기능 등 -->
-                </div>
-            </c:forEach>
+        <!-- 목록 보여주는 곳 -->
+        <div class="menu-list" id="menuListContainer">
+            <jsp:include page="list_content.jsp" />
         </div>
 
-        <a href="menu/regist" class="btn">메뉴 등록하기</a>
+        <!-- (+) 버튼 -->
+        <button onclick="openRegistModal()" class="fab">+</button>
     </div>
+
+    <!-- 1. 등록 모달 (평소엔 숨겨져 있음) -->
+    <div id="registModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>메뉴 등록</h2>
+            <form id="registForm">
+                <input type="text" name="menuName" placeholder="메뉴명">
+                <input type="number" name="menuPrice" placeholder="가격">
+                <!-- ... -->
+                <button type="submit">등록하기</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. 알림 토스트 메시지 (초록색 뿅!) -->
+    <div id="toast" class="toast">메시지</div>
+
+    <script>
+        // "등록하기" 눌렀을 때 실행되는 함수
+        document.getElementById('registForm').onsubmit = function(e) {
+            e.preventDefault(); // 페이지 새로고침 막음 (중요!)
+
+            // 폼 검증 (빈칸 있나?)
+            if (!this.checkValidity()) return;
+
+            // 서버로 몰래 데이터 전송 (AJAX)
+            const formData = new FormData(this);
+            fetch('${pageContext.request.contextPath}/menu/regist', {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(response => response.text())
+            .then(result => {
+                if (result.trim() === 'success') {
+                    // 성공하면 초록색 알림 띄우고 모달 닫음
+                    showToast('메뉴가 등록되었습니다.', 'success');
+                    closeAllModals();
+                    refreshList(); // 목록 새로고침
+                }
+            });
+        };
+    </script>
 
 </body>
 </html>
@@ -724,28 +779,17 @@ HTML과 비슷하지만 `<% %>`나 `${ }` 같은 자바 코드를 쓸 수 있는
 ### 8. 메인 화면 (index.jsp)
 ![JSP](https://img.shields.io/badge/JSP-index.jsp-007396?style=flat&logo=java&logoColor=white)
 
-사용자가 사이트에 처음 들어왔을 때 보이는 대문입니다.
-
 ```jsp
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
     <title>배달의 민족 - 사장님 광장</title>
-    <!-- 외부 스타일시트(CSS) 불러오기 -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css">
 </head>
 <body>
-
     <div class="container">
-        <div class="landing-container">
-            <div class="logo">배달의 민족<br>사장님 광장</div>
-            <p class="subtitle">우리 가게 메뉴를 쉽고 간편하게 관리하세요</p>
-
-            <!-- '메뉴 관리 시작하기' 버튼을 누르면 '/menu/list'로 이동합니다. -->
-            <a href="menu/list" class="btn-start">메뉴 관리 시작하기</a>
-        </div>
+        <!-- '메뉴 관리 시작하기' 버튼 -->
+        <a href="menu/list" class="btn-start">메뉴 관리 시작하기</a>
     </div>
-
 </body>
 </html>
 ```

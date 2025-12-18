@@ -376,7 +376,43 @@ header h1 {
     font-size: 0.7rem;
 }
 
-.sort-btn.desc::after {
-    content: "▼";
-    font-size: 0.7rem;
+
+/* Notification Toast */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    min-width: 300px;
+    text-align: center;
+}
+
+.toast {
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 50px;
+    padding: 16px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(-20px);
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background-color: #4CAF50; /* Green */
+}
+
+.toast.error {
+    background-color: #F44336; /* Red */
 }

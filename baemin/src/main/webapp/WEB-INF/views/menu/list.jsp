@@ -31,7 +31,7 @@
                 </div>
 
                 <!-- Floating Action Button for Registration -->
-                <a href="${pageContext.request.contextPath}/menu/regist" class="fab">+</a>
+                <button onclick="openRegistModal()" class="fab" style="border:none;">+</button>
 
                 <footer class="site-footer">
                     <div class="footer-content">
@@ -41,46 +41,71 @@
                 </footer>
             </div>
 
-            <!-- Modal -->
-            <div id="menuModal" class="modal-overlay">
+            <!-- Toast Notification -->
+            <div id="toastContainer" class="toast-container">
+                <div id="toast" class="toast">메시지</div>
+            </div>
+
+            <!-- Detail Modal -->
+            <div id="detailModal" class="modal-overlay">
                 <div class="modal-content">
-                    <button class="btn-close" onclick="closeModal()">×</button>
+                    <button class="btn-close" onclick="closeDetailModal()">×</button>
                     <h2 class="modal-title" id="modalTitle">메뉴 상세</h2>
 
                     <div class="modal-body">
-                        <p><span class="modal-label">메뉴명</span> <span class="modal-value" id="modalName"></span></p>
-                        <p><span class="modal-label">가격</span> <span class="modal-value" id="modalPrice"></span></p>
-                        <p><span class="modal-label">카테고리</span> <span class="modal-value" id="modalCategory"></span>
+                        <p><span class="modal-label">메뉴명</span> <span class="modal-value" id="detailName"></span></p>
+                        <p><span class="modal-label">가격</span> <span class="modal-value" id="detailPrice"></span></p>
+                        <p><span class="modal-label">카테고리</span> <span class="modal-value" id="detailCategory"></span>
                         </p>
-                        <p><span class="modal-label">상태</span> <span class="modal-value" id="modalStatus"></span></p>
+                        <p><span class="modal-label">상태</span> <span class="modal-value" id="detailStatus"></span></p>
                     </div>
 
                     <div class="modal-actions">
-                        <button class="btn btn-primary" id="btnUpdate">수정</button>
-                        <button class="btn btn-danger" onclick="deleteMenu()">삭제</button>
+                        <button class="btn btn-primary" id="btnToUpdate">수정</button>
+                        <button class="btn btn-danger" onclick="openDeleteModal()">삭제</button>
                     </div>
-
-                    <form id="deleteForm" action="${pageContext.request.contextPath}/menu/delete" method="post"
-                        style="display:none;">
-                        <input type="hidden" name="menuCode" id="deleteMenuCode">
-                    </form>
                 </div>
             </div>
 
-            <!-- Delete Confirmation Modal -->
-            <div id="deleteModal" class="modal-overlay delete-modal">
+            <!-- Registration Modal -->
+            <div id="registModal" class="modal-overlay">
                 <div class="modal-content">
-                    <button class="btn-close" onclick="closeDeleteModal()">×</button>
-                    <h2 class="modal-title">메뉴 삭제</h2>
+                    <button class="btn-close" onclick="closeRegistModal()">×</button>
+                    <h2 class="modal-title">메뉴 등록</h2>
 
-                    <div class="modal-body" style="text-align: center; display: block;">
-                        <p style="justify-content: center; margin-bottom: 20px;">정말 삭제하시겠습니까?<br>삭제된 메뉴는 복구할 수 없습니다.</p>
-                    </div>
+                    <form id="registForm">
+                        <div class="form-group">
+                            <label class="form-label">메뉴명</label>
+                            <input type="text" name="menuName" class="form-input" placeholder="예: 맛있는 치킨" required>
+                        </div>
 
-                    <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeDeleteModal()">취소</button>
-                        <button class="btn btn-primary" onclick="confirmDelete()">삭제하기</button>
-                    </div>
+                        <div class="form-group">
+                            <label class="form-label">가격</label>
+                            <input type="number" name="menuPrice" class="form-input" placeholder="10000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">카테고리</label>
+                            <select name="categoryCode" class="form-select" required>
+                                <c:forEach var="category" items="${categoryList}">
+                                    <option value="${category.categoryCode}">${category.categoryName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">판매 상태</label>
+                            <select name="orderableStatus" class="form-select">
+                                <option value="Y">주문 가능</option>
+                                <option value="N">품절</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeRegistModal()">취소</button>
+                            <button type="submit" class="btn btn-primary">등록하기</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -90,7 +115,7 @@
                     <button class="btn-close" onclick="closeUpdateModal()">×</button>
                     <h2 class="modal-title">메뉴 수정</h2>
 
-                    <form action="${pageContext.request.contextPath}/menu/update" method="post">
+                    <form id="updateForm">
                         <input type="hidden" name="menuCode" id="updateMenuCode">
 
                         <div class="form-group">
@@ -128,74 +153,222 @@
                 </div>
             </div>
 
+            <!-- Delete Confirmation Modal -->
+            <div id="deleteModal" class="modal-overlay delete-modal">
+                <div class="modal-content">
+                    <button class="btn-close" onclick="closeDeleteModal()">×</button>
+                    <h2 class="modal-title">메뉴 삭제</h2>
+
+                    <div class="modal-body" style="text-align: center; display: block;">
+                        <p style="justify-content: center; margin-bottom: 20px;">정말 삭제하시겠습니까?<br>삭제된 메뉴는 복구할 수 없습니다.</p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeDeleteModal()">취소</button>
+                        <button class="btn btn-primary" onclick="confirmDelete()">삭제하기</button>
+                    </div>
+                </div>
+            </div>
+
             <script>
-                const modal = document.getElementById('menuModal');
-                const deleteModal = document.getElementById('deleteModal');
-                const updateModal = document.getElementById('updateModal');
-                const deleteInput = document.getElementById('deleteMenuCode');
-                const updateBtn = document.getElementById('btnUpdate');
+                // --- Notification Toast ---
+                function showToast(message, type) {
+                    const toast = document.getElementById('toast');
+                    toast.innerText = message;
+                    toast.className = 'toast show ' + type;
 
-                // Update Form Elements
-                const upCode = document.getElementById('updateMenuCode');
-                const upName = document.getElementById('updateMenuName');
-                const upPrice = document.getElementById('updateMenuPrice');
-                const upCategory = document.getElementById('updateCategoryCode');
-                const upStatus = document.getElementById('updateOrderableStatus');
+                    setTimeout(function () {
+                        toast.className = toast.className.replace('show', '');
+                    }, 3000); // Hide after 3 seconds
+                }
 
-                // Sorting State: Server-side driven via AJAX
-                let currentSortState = ''; // Store client-side to manage toggle logic
+                // --- Common AJAX Handler ---
+                function sendAjax(url, formData, successMsg, failMsg, onSuccess) {
+                    const params = new URLSearchParams(formData);
 
-                function toggleSort(type) {
-                    let newSort = '';
-
-                    // Logic to determine next sort state
-                    if (type === 'name') {
-                        if (currentSortState === 'name_asc') {
-                            newSort = 'name_desc';
-                        } else if (currentSortState === 'name_desc') {
-                            newSort = '';
-                        } else {
-                            newSort = 'name_asc';
-                        }
-                    } else if (type === 'price') {
-                        if (currentSortState === 'price_asc') {
-                            newSort = 'price_desc';
-                        } else if (currentSortState === 'price_desc') {
-                            newSort = '';
-                        } else {
-                            newSort = 'price_asc';
-                        }
-                    }
-
-                    // AJAX Request
-                    fetch('${pageContext.request.contextPath}/menu/list?sort=' + newSort, {
+                    fetch(url, {
+                        method: 'POST',
+                        body: params,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                         }
                     })
                         .then(response => response.text())
+                        .then(result => {
+                            if (result.trim() === 'success') {
+                                showToast(successMsg, 'success');
+                                closeAllModals();
+                                refreshList();
+                                if (onSuccess) onSuccess();
+                            } else {
+                                showToast(failMsg, 'error');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            showToast('오류가 발생했습니다.', 'error');
+                        });
+                }
+
+                // --- Refresh List ---
+                function refreshList() {
+                    const sort = currentSortState;
+                    const url = '${pageContext.request.contextPath}/menu/list?sort=' + sort;
+
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(response => response.text())
                         .then(html => {
                             document.getElementById('menuListContainer').innerHTML = html;
-                            currentSortState = newSort;
-                            updateSortButtons(newSort);
+                        });
+                }
 
-                            // Update URL without reload (History API)
-                            const newUrl = new URL(window.location);
-                            if (newSort) {
-                                newUrl.searchParams.set('sort', newSort);
-                            } else {
-                                newUrl.searchParams.delete('sort');
-                            }
-                            window.history.pushState({}, '', newUrl);
-                        })
-                        .catch(err => console.error('Sort failed', err));
+                function closeAllModals() {
+                    document.getElementById('detailModal').style.display = 'none';
+                    document.getElementById('registModal').style.display = 'none';
+                    document.getElementById('updateModal').style.display = 'none';
+                    document.getElementById('deleteModal').style.display = 'none';
+                    currentMenuCode = null;
+
+                    // Clear Update Form State when fully exiting
+                    clearUpdateFormState();
+                }
+
+                function clearUpdateFormState() {
+                    document.getElementById('updateMenuCode').value = '';
+                    document.getElementById('updateForm').reset();
+                }
+
+                // --- Global Events (ESC Key) ---
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeAllModals();
+                    }
+                });
+
+                // --- State ---
+                let currentMenuCode = null;
+                let currentSortState = '';
+
+                // --- Regist Modal ---
+                function openRegistModal() {
+                    document.getElementById('registModal').style.display = 'flex';
+                    // Focus first input if empty
+                    const nameInput = document.querySelector('#registForm input[name="menuName"]');
+                    if (!nameInput.value) setTimeout(() => nameInput.focus(), 100);
+                }
+                function closeRegistModal() {
+                    document.getElementById('registModal').style.display = 'none';
+                }
+
+                document.getElementById('registForm').onsubmit = function (e) {
+                    e.preventDefault();
+                    if (!this.checkValidity()) {
+                        this.reportValidity();
+                        return;
+                    }
+                    const formData = new FormData(this);
+                    // Pass callback to reset form ONLY on success
+                    sendAjax('${pageContext.request.contextPath}/menu/regist', formData, '메뉴가 등록되었습니다.', '메뉴 등록에 실패했습니다.', () => {
+                        document.getElementById('registForm').reset();
+                    });
+                };
+
+                // --- Detail Modal ---
+                function openModal(code, name, price, categoryName, categoryCode, status) {
+                    currentMenuCode = code;
+
+                    document.getElementById('detailName').innerText = name;
+                    document.getElementById('detailPrice').innerText = price + '원';
+                    document.getElementById('detailCategory').innerText = categoryName;
+                    document.getElementById('detailStatus').innerText = status === 'Y' ? '주문가능' : '품절';
+
+                    document.getElementById('btnToUpdate').onclick = function () {
+                        openUpdateModal(code, name, price, categoryCode, status);
+                    };
+
+                    document.getElementById('detailModal').style.display = 'flex';
+                }
+                function closeDetailModal() {
+                    document.getElementById('detailModal').style.display = 'none';
+                    clearUpdateFormState(); // Leaving Detail clears Update state
+                }
+
+                // --- Update Modal ---
+                function openUpdateModal(code, name, price, categoryCode, status) {
+                    // Only populate if it's a new item (code mismatch)
+                    const currentUpCode = document.getElementById('updateMenuCode').value;
+
+                    if (currentUpCode != code) {
+                        document.getElementById('updateMenuCode').value = code;
+                        document.getElementById('updateMenuName').value = name;
+                        document.getElementById('updateMenuPrice').value = price;
+                        document.getElementById('updateCategoryCode').value = categoryCode;
+                        document.getElementById('updateOrderableStatus').value = status;
+                    }
+
+                    document.getElementById('updateModal').style.display = 'flex';
+                    document.getElementById('detailModal').style.display = 'none';
+
+                    setTimeout(() => document.getElementById('updateMenuName').focus(), 100);
+                }
+                function closeUpdateModal() {
+                    document.getElementById('updateModal').style.display = 'none';
+                    document.getElementById('detailModal').style.display = 'flex';
+                }
+
+                document.getElementById('updateForm').onsubmit = function (e) {
+                    e.preventDefault();
+                    if (!this.checkValidity()) {
+                        this.reportValidity();
+                        return;
+                    }
+                    const formData = new FormData(this);
+                    sendAjax('${pageContext.request.contextPath}/menu/update', formData, '메뉴가 수정되었습니다.', '메뉴 수정에 실패했습니다.');
+                };
+
+                // --- Delete Modal ---
+                function openDeleteModal() {
+                    document.getElementById('deleteModal').style.display = 'flex';
+                    document.getElementById('detailModal').style.display = 'none';
+                }
+                function closeDeleteModal() {
+                    document.getElementById('deleteModal').style.display = 'none';
+                    document.getElementById('detailModal').style.display = 'flex'; // Cancel delete returns to detail
+                }
+                function confirmDelete() {
+                    if (!currentMenuCode) return;
+                    const formData = new FormData();
+                    formData.append('menuCode', currentMenuCode);
+                    sendAjax('${pageContext.request.contextPath}/menu/delete', formData, '메뉴가 삭제되었습니다.', '메뉴 삭제에 실패했습니다.');
+                }
+
+
+                // --- Sorting ---
+                function toggleSort(type) {
+                    let newSort = '';
+                    if (type === 'name') {
+                        if (currentSortState === 'name_asc') newSort = 'name_desc';
+                        else if (currentSortState === 'name_desc') newSort = '';
+                        else newSort = 'name_asc';
+                    } else if (type === 'price') {
+                        if (currentSortState === 'price_asc') newSort = 'price_desc';
+                        else if (currentSortState === 'price_desc') newSort = '';
+                        else newSort = 'price_asc';
+                    }
+                    currentSortState = newSort;
+                    updateSortButtons(newSort);
+                    refreshList();
+
+                    const newUrl = new URL(window.location);
+                    if (newSort) newUrl.searchParams.set('sort', newSort);
+                    else newUrl.searchParams.delete('sort');
+                    window.history.pushState({}, '', newUrl);
                 }
 
                 function updateSortButtons(sort) {
-                    // Reset all
                     document.getElementById('sortName').className = 'sort-btn';
                     document.getElementById('sortPrice').className = 'sort-btn';
-
                     if (!sort) return;
 
                     if (sort.startsWith('name')) {
@@ -211,72 +384,18 @@
                     }
                 }
 
-                // Initialize State on Load
+                // --- Init ---
                 window.onload = function () {
                     const urlParams = new URLSearchParams(window.location.search);
                     currentSortState = urlParams.get('sort') || '';
                     updateSortButtons(currentSortState);
                 };
 
-                // Open Detail Modal
-                function openModal(code, name, price, categoryName, categoryCode, status) {
-                    document.getElementById('modalName').innerText = name;
-                    document.getElementById('modalPrice').innerText = price + '원';
-                    document.getElementById('modalCategory').innerText = categoryName;
-                    document.getElementById('modalStatus').innerText = status === 'Y' ? '주문가능' : '품절';
-
-                    deleteInput.value = code;
-
-                    // Setup Update Button to open Update Modal
-                    updateBtn.onclick = function () {
-                        openUpdateModal(code, name, price, categoryCode, status);
-                    };
-
-                    modal.style.display = 'flex';
-                }
-
-                function closeModal() {
-                    modal.style.display = 'none';
-                }
-
-                function openDeleteModal() {
-                    deleteModal.style.display = 'flex';
-                    closeModal();
-                }
-
-                function closeDeleteModal() {
-                    deleteModal.style.display = 'none';
-                    modal.style.display = 'flex';
-                }
-
-                function openUpdateModal(code, name, price, categoryCode, status) {
-                    upCode.value = code;
-                    upName.value = name;
-                    upPrice.value = price;
-                    upCategory.value = categoryCode;
-                    upStatus.value = status;
-
-                    updateModal.style.display = 'flex';
-                    closeModal(); // Hide detail
-                }
-
-                function closeUpdateModal() {
-                    updateModal.style.display = 'none';
-                    modal.style.display = 'flex'; // Back to detail
-                }
-
-                function deleteMenu() {
-                    openDeleteModal();
-                }
-
-                function confirmDelete() {
-                    document.getElementById("deleteForm").submit();
-                }
-
                 window.onclick = function (event) {
-                    if (event.target == modal) closeModal();
-                    if (event.target == deleteModal) closeDeleteModal();
-                    if (event.target == updateModal) closeUpdateModal();
+                    if (event.target == document.getElementById('detailModal')) closeDetailModal();
+                    if (event.target == document.getElementById('registModal')) closeRegistModal();
+                    if (event.target == document.getElementById('updateModal')) closeUpdateModal();
+                    if (event.target == document.getElementById('deleteModal')) closeDeleteModal();
                 }
 
             </script>
